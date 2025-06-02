@@ -1,0 +1,199 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather</title>
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="{% static 'leaflet/leaflet.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- سایدبار -->
+    <div id="sidebar">
+        <h2>وضعیت هوا</h2>
+        <input type="text" id="cityInput" placeholder="مثلاً: Tehran">
+        <button onclick="searchCity()">جستجوی شهر</button>
+        <div id="weatherPanel" style="display:none; padding: 20px; border: 1px solid #ccc; margin-top: 20px;">
+            <div id="weatherInfo"></div>
+            <button id="showForecastBtn" onclick="getForecast()" style="margin-top: 10px;">مشاهده پیش‌بینی ۵ روزه</button>
+        </div>
+
+        <table id="forecastTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>تاریخ</th>
+                    <th>دما (°C)</th>
+                    <th>رطوبت (%)</th>
+                    <th>وضعیت</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <canvas id="tempChart" style="display:none;"></canvas>
+    </div>
+
+    <!-- نقشه -->
+    <div id="map"></div>
+
+    <!-- اسکریپت‌ها -->
+    <script>
+        let lastClickedLat = null;
+        let lastClickedLon = null;
+
+        // تنظیم نقشه
+        const map = L.map('map').setView([35.1054, 53.6405], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // کلیک روی نقشه
+        map.on('click', function(e) {
+            lastClickedLat = e.latlng.lat;
+            lastClickedLon = e.latlng.lng;
+
+            fetch(`/weather/get_weather/?lat=${lastClickedLat}&lon=${lastClickedLon}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        displayWeather(data);
+                        map.setView([lastClickedLat, lastClickedLon], 8);
+                    }
+                })
+                .catch(error => alert("خطا در دریافت اطلاعات آب‌وهوا"));
+        });
+
+        // جستجوی شهر
+        function searchCity() {
+            const city = document.getElementById('cityInput').value;
+            if (!city) {
+                alert("لطفاً نام شهر را وارد کنید!");
+                return;
+            }
+
+            fetch(`/weather/search_city/?q=${city}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        lastClickedLat = data.coord.lat;
+                        lastClickedLon = data.coord.lon;
+                        map.setView([lastClickedLat, lastClickedLon], 8);
+                        displayWeather(data);
+                    }
+                })
+                .catch(error => alert("خطا در جستجوی شهر"));
+        }
+
+        // نمایش اطلاعات آب‌وهوا
+        function displayWeather(data) {
+            const panel = document.getElementById("weatherPanel");
+            panel.style.display = "block";
+
+            document.getElementById("weatherInfo").innerHTML = `
+                <h3>${data.name}</h3>
+                <div class="weather-item"><i class="fas fa-cloud-sun" title="وضعیت آب و هوا"></i> ${data.weather[0].description}</div>
+                <div class="weather-item"><i class="fas fa-temperature-high" title="دما"></i> ${data.main.temp}°C</div>
+                <div class="weather-item"><i class="fas fa-tint" title="رطوبت"></i> ${data.main.humidity}%</div>
+                <div class="weather-item"><i class="fas fa-wind" title="سرعت باد"></i> ${data.wind.speed} m/s</div>
+                <div class="weather-item"><i class="fas fa-compress-arrows-alt" title="فشار هوا"></i> ${data.main.pressure} hPa</div>
+            `;
+        }
+
+        // دریافت پیش‌بینی ۵ روزه
+        function getForecast() {
+            if (!lastClickedLat || !lastClickedLon) {
+                alert("لطفاً ابتدا یک شهر را جستجو کنید یا روی نقشه کلیک کنید!");
+                return;
+            }
+
+            fetch(`/weather/get_forecast/?lat=${lastClickedLat}&lon=${lastClickedLon}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else if (data.daily) {
+                        showForecast(data.daily);
+                    } else {
+                        alert("داده‌ای برای پیش‌بینی یافت نشد.");
+                    }
+                })
+                .catch(error => alert("خطا در دریافت پیش‌بینی"));
+        }
+
+        // نمایش جدول و نمودار پیش‌بینی
+        function showForecast(daily) {
+            const table = document.getElementById('forecastTable');
+            const tbody = table.querySelector("tbody");
+            const chartCanvas = document.getElementById('tempChart');
+
+            tbody.innerHTML = "";
+            const labels = [];
+            const temps = [];
+
+            daily.forEach(day => {
+                const date = new Date(day.dt_txt).toLocaleDateString('fa-IR');
+                const temp = day.main.temp;
+                const humidity = day.main.humidity;
+                const weather = day.weather[0].description;
+
+                labels.push(date);
+                temps.push(temp);
+
+                const row = `
+                    <tr>
+                        <td>${date}</td>
+                        <td>${temp}</td>
+                        <td>${humidity}</td>
+                        <td>${weather}</td>
+                    </tr>`;
+                tbody.innerHTML += row;
+            });
+
+            table.style.display = 'table';
+            chartCanvas.style.display = 'block';
+            renderChart(labels, temps);
+        }
+
+        // رندر نمودار
+        let chart = null;
+        function renderChart(labels, temps) {
+            const ctx = document.getElementById('tempChart').getContext('2d');
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'دما (°C)',
+                        data: temps,
+                        borderColor: '#1e90ff',
+                        backgroundColor: 'rgba(30, 144, 255, 0.2)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.raw} درجه سانتی‌گراد`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
