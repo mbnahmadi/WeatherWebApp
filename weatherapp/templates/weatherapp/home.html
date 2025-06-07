@@ -83,7 +83,13 @@
                 // ایجاد مارکر مجدد
                 currentMarker = L.marker([lastClickedLat, lastClickedLon])
                     .addTo(map)
-                    .bindPopup(`عرض جغرافیایی: ${lastClickedLat.toFixed(4)}<br>طول جغرافیایی: ${lastClickedLon.toFixed(4)}`)
+                    .bindPopup(`
+                        <div>
+                            <p>عرض جغرافیایی: ${lastClickedLat.toFixed(4)}</p>
+                            <p>طول جغرافیایی: ${lastClickedLon.toFixed(4)}</p>
+                            <button onclick="removeMarker()" style="margin-top:5px;background:#d9534f;color:white;border:none;padding:5px 10px;border-radius:5px;">🗑 حذف</button>
+                        </div>
+                    `)
                     .openPopup();
 
                 // رفتن به موقعیت
@@ -97,6 +103,10 @@
                             displayWeather(data);
                         }
                     });
+            }
+            if (window.location.pathname === "/logout/") {
+                localStorage.removeItem("lat");
+                localStorage.removeItem("lon");
             }
         });
 
@@ -115,7 +125,13 @@
             // ایجاد مارکر جدید با popup شامل lat و lon
             currentMarker = L.marker([lastClickedLat, lastClickedLon])
                 .addTo(map)
-                .bindPopup(`عرض جغرافیایی: ${lastClickedLat.toFixed(4)}<br>طول جغرافیایی: ${lastClickedLon.toFixed(4)}`)
+                .bindPopup(`
+                    <div>
+                        <p>عرض جغرافیایی: ${lastClickedLat.toFixed(4)}</p>
+                        <p>طول جغرافیایی: ${lastClickedLon.toFixed(4)}</p>
+                        <button onclick="removeMarker()" style="margin-top:5px;background:#d9534f;color:white;border:none;padding:5px 10px;border-radius:5px;">🗑 حذف</button>
+                    </div>
+                `)
                 .openPopup();
 
             fetch(`/weather/get_weather/?lat=${lastClickedLat}&lon=${lastClickedLon}`)
@@ -152,7 +168,13 @@
                         // ایجاد مارکر جدید با popup شامل lat و lon
                         currentMarker = L.marker([lastClickedLat, lastClickedLon])
                             .addTo(map)
-                            .bindPopup(`Latitude: ${lastClickedLat.toFixed(4)}<br>Longitude: ${lastClickedLon.toFixed(4)}`)
+                            .bindPopup(`
+                                <div>
+                                    <p>عرض جغرافیایی: ${lastClickedLat.toFixed(4)}</p>
+                                    <p>طول جغرافیایی: ${lastClickedLon.toFixed(4)}</p>
+                                    <button onclick="removeMarker()" style="margin-top:5px;background:#d9534f;color:white;border:none;padding:5px 10px;border-radius:5px;">🗑 حذف</button>
+                                </div>
+                            `)
                             .openPopup();
 
                         map.setView([lastClickedLat, lastClickedLon], 8);
@@ -283,10 +305,18 @@
                 }
             });
         }
-        if (window.location.pathname === "/logout/") {
-            localStorage.removeItem("lat");
-            localStorage.removeItem("lon");
+        function removeMarker() {
+            if (currentMarker) {
+                map.removeLayer(currentMarker);
+                currentMarker = null;
+                lastClickedLat = null;
+                lastClickedLon = null;
+                localStorage.removeItem("lat");
+                localStorage.removeItem("lon");
+                document.getElementById("weatherPanel").style.display = "none";
+            }
         }
+        
     </script>
 </body>
 </html>
