@@ -13,7 +13,7 @@ def register_view(request):
         form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # 👈 این خط باعث لاگین خودکار می‌شه
+            login(request, user)  #  این خط باعث لاگین خودکار می‌شه
             messages.success(request, "ثبت‌نام با موفقیت انجام شد و وارد شدید.")
             return redirect('home')
     else:

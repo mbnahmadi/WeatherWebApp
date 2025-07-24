@@ -1,10 +1,10 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>وضعیت هوا</title>
+    <title>weather status</title>
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'leaflet/leaflet.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -17,22 +17,22 @@
     <div id="sidebar">
         <div id="authSection" class="auth-links" style="margin-bottom: 20px;">
             {% if user.is_authenticated %}
-                <span>سلام {{ user.first_name }} 👋</span>
-                <a href="{% url 'profile' %}" class="profile-btn">پروفایل</a>
-                <a href="{% url 'logout' %}" class="logout-btn">خروج</a>
+                <span>Hi {{ user.first_name }} 👋</span>
+                <a href="{% url 'profile' %}" class="profile-btn">profile</a>
+                <a href="{% url 'logout' %}" class="logout-btn">logout</a>
             {% else %}
-                <a href="{% url 'login' %}" class="auth-btn">ورود</a> |
-                <a href="{% url 'register' %}" class="auth-btn">ثبت‌نام</a>
+                <a href="{% url 'login' %}" class="auth-btn">login</a> |
+                <a href="{% url 'register' %}" class="auth-btn">register</a>
             {% endif %}
         </div>
 
-        <h2 style="color: rgb(84, 90, 84);">سامانه پیش‌بینی وضعیت هوا</h2>
-        <input type="text" id="cityInput" placeholder="مثلاً: Tehran">
-        <button onclick="searchCity()">جستجوی شهر</button>
+        <h1 style="color: rgb(84, 90, 84);">Weather Forecasting System</h1>
+        <input type="text" id="cityInput" placeholder="e.g: Tehran">
+        <button onclick="searchCity()">search city</button>
 
         <div id="weatherPanel" class="hidden">
             <div id="weatherInfo"></div>
-            <button id="showForecastBtn" onclick="getForecast()" class="forecastbtn">نمایش پیش‌بینی ۵ روزه</button>
+            <button id="showForecastBtn" onclick="getForecast()" class="forecastbtn">Show 5-day forecast</button>
         </div>
     </div>
 
@@ -45,15 +45,15 @@
             <button onclick="closeModal()" class="close-btn">
                 <i class="fas fa-times"></i>
             </button>
-            <h3>پیش‌بینی ۵ روزه</h3>
+            <h3>5-days forecast</h3>
             <table id="forecastTable">
                 <thead style="background-color: rgb(156, 156, 255);">
                     <tr>
-                        <th>تاریخ</th>
-                        <th>وضعیت</th>
-                        <th>دما (°C)</th>
-                        <th>رطوبت (%)</th>
-                        <th>سرعت باد (m/s)</th>
+                        <th>date</th>
+                        <th>status</th>
+                        <th>temperature (°C)</th>
+                        <th>humidity (%)</th>
+                        <th>wind speed (m/s)</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -85,9 +85,9 @@
                     .addTo(map)
                     .bindPopup(`
                         <div>
-                            <p>عرض جغرافیایی: ${lastClickedLat.toFixed(4)}</p>
-                            <p>طول جغرافیایی: ${lastClickedLon.toFixed(4)}</p>
-                            <button onclick="removeMarker()" style="margin-top:5px;background:#d9534f;color:white;border:none;padding:5px 10px;border-radius:5px;">🗑 حذف</button>
+                            <p>latitude: ${lastClickedLat.toFixed(4)}</p>
+                            <p>longitude: ${lastClickedLon.toFixed(4)}</p>
+                            <button onclick="removeMarker()" style="margin-top:5px;background:#d9534f;color:white;border:none;padding:5px 10px;border-radius:5px;">🗑 remove</button>
                         </div>
                     `)
                     .openPopup();
@@ -127,9 +127,9 @@
                 .addTo(map)
                 .bindPopup(`
                     <div>
-                        <p>عرض جغرافیایی: ${lastClickedLat.toFixed(4)}</p>
-                        <p>طول جغرافیایی: ${lastClickedLon.toFixed(4)}</p>
-                        <button onclick="removeMarker()" style="margin-top:5px;background:#d9534f;color:white;border:none;padding:5px 10px;border-radius:5px;">🗑 حذف</button>
+                        <p>latitude: ${lastClickedLat.toFixed(4)}</p>
+                        <p>longitude: ${lastClickedLon.toFixed(4)}</p>
+                        <button onclick="removeMarker()" style="margin-top:5px;background:#d9534f;color:white;border:none;padding:5px 10px;border-radius:5px;">🗑 remove</button>
                     </div>
                 `)
                 .openPopup();
@@ -142,12 +142,12 @@
                         displayWeather(data);
                         map.setView([lastClickedLat, lastClickedLon], 8);
                     }
-                }).catch(() => alert("خطا در دریافت اطلاعات آب‌وهوا"));
+                }).catch(() => alert("Error receiving weather information"));
         });
 
         function searchCity() {
             const city = document.getElementById("cityInput").value;
-            if (!city) return alert("نام شهر را وارد کنید!");
+            if (!city) return alert("Enter the city name.");
 
             fetch(`/weather/search_city/?q=${city}`)
                 .then(res => res.json())
@@ -170,9 +170,9 @@
                             .addTo(map)
                             .bindPopup(`
                                 <div>
-                                    <p>عرض جغرافیایی: ${lastClickedLat.toFixed(4)}</p>
-                                    <p>طول جغرافیایی: ${lastClickedLon.toFixed(4)}</p>
-                                    <button onclick="removeMarker()" style="margin-top:5px;background:#d9534f;color:white;border:none;padding:5px 10px;border-radius:5px;">🗑 حذف</button>
+                                    <p>latitude: ${lastClickedLat.toFixed(4)}</p>
+                                    <p>longitude: ${lastClickedLon.toFixed(4)}</p>
+                                    <button onclick="removeMarker()" style="margin-top:5px;background:#d9534f;color:white;border:none;padding:5px 10px;border-radius:5px;">🗑 remove</button>
                                 </div>
                             `)
                             .openPopup();
@@ -180,7 +180,7 @@
                         map.setView([lastClickedLat, lastClickedLon], 8);
                         displayWeather(data);
                     }
-                }).catch(() => alert("خطا در جستجوی شهر"));
+                }).catch(() => alert("Error searching for city"));
         }
             function displayWeather(data) {
                 document.getElementById("weatherPanel").style.display = "block";
@@ -188,21 +188,21 @@
                     <h3 class="weather-item-name">${data.name}</h3>
                     <div class="weather-row">
                         <div class="weather-item">
-                            <img src="{% static 'images/cloudy.png' %}" alt="وضعیت">
+                            <img src="{% static 'images/cloudy.png' %}" alt="status">
                             <span>${data.weather[0].description}</span>
                         </div>
                         <div class="weather-item">
-                            <img src="{% static 'images/high-temperature.png' %}" alt="دما">
+                            <img src="{% static 'images/high-temperature.png' %}" alt="temperature">
                             <span>${data.main.temp}°C</span>
                         </div>
                     </div>
                     <div class="weather-row">
                         <div class="weather-item">
-                            <img src="{% static 'images/humidity.png' %}" alt="رطوبت">
+                            <img src="{% static 'images/humidity.png' %}" alt="humidity">
                             <span>${data.main.humidity}%</span>
                         </div>
                         <div class="weather-item">
-                            <img src="{% static 'images/wind.png' %}" alt="باد">
+                            <img src="{% static 'images/wind.png' %}" alt="wind speed">
                             <span>${data.wind.speed} m/s</span>
                         </div>
                     </div>
@@ -211,7 +211,7 @@
 
         function getForecast() {
             if (!lastClickedLat || !lastClickedLon)
-                return alert("ابتدا یک نقطه را انتخاب کنید!");
+                return alert("First, choose a location!");
 
             fetch(`/weather/get_forecast/?lat=${lastClickedLat}&lon=${lastClickedLon}`)
                 .then(res => {
@@ -227,9 +227,9 @@
 
                     if (data.error) alert(data.error);
                     else if (data.daily) showForecast(data.daily);
-                    else alert("داده‌ای برای پیش‌بینی یافت نشد.");
+                    else alert("No data found for prediction.");
                 })
-                .catch(() => alert("خطا در دریافت پیش‌بینی"));
+                .catch(() => alert("Error retrieving forecast"));
         }
 
         function showForecast(daily) {
@@ -239,7 +239,7 @@
 
             tbody.innerHTML = "";
             daily.forEach(day => {
-                const date = new Date(day.dt_txt).toLocaleDateString('fa-IR');
+                const date = new Date(day.dt_txt).toLocaleDateString('en-US');    //.toLocaleDateString('fa-IR')
                 const weather = day.weather[0].description;
                 const temp = day.main.temp;
                 const humidity = day.main.humidity;
@@ -275,7 +275,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: "دما (°C)",
+                        label: "temperature (°C)",
                         data: temps,
                         borderColor: "red",
                         backgroundColor: "rgba(255, 30, 30, 0.2)",
@@ -283,7 +283,7 @@
                         fill: true
                     },
                     {
-                        label: "باد (m/s)",
+                        label: "wind speed (m/s)",
                         data: wind,
                         borderColor: "blue",
                         backgroundColor: "#4240af7a",
@@ -298,7 +298,7 @@
                     plugins: {
                         tooltip: {
                             callbacks: {
-                                label: ctx => `${ctx.raw} درجه سانتی‌گراد`
+                                label: ctx => `${ctx.raw} (°C)`  
                             }
                         }
                     }

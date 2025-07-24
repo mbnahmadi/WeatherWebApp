@@ -28,16 +28,16 @@ from .models import CustomUser
 class CustomUserCreationForm(UserCreationForm):
     email = forms.CharField(
         required=True, 
-        label="ایمیل",
+        label="email",
         widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'example@example.com'}),
         )
     password1 = forms.CharField(
-        label="رمز عبور",
+        label="password",
         strip=False,
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password", "class": "form-control", "placeholder": "رمز عبور"}),
     )
     password2 = forms.CharField(
-        label="تأیید رمز عبور",
+        label="confirm password",
         strip=False,
         widget=forms.PasswordInput(attrs={"autocomplete": "new-password", "class": "form-control", "placeholder": "تأیید رمز عبور"}),
     )
@@ -46,10 +46,10 @@ class CustomUserCreationForm(UserCreationForm):
         model = CustomUser
         fields = ('username', 'first_name', 'last_name', 'email', 'profile_image', 'password1', 'password2')
         labels = {
-            'username': 'نام کاربری',
-            'first_name': 'نام',
-            'last_name': 'نام خانوادگی',
-            'profile_image': 'عکس پروفایل',
+            'username': 'username',
+            'first_name': 'first name',
+            'last_name': 'last name',
+            'profile_image': 'profile image',
         }
 
     def __init__(self, *args, **kwargs):
@@ -66,12 +66,12 @@ class CustomUserCreationForm(UserCreationForm):
 
 class LoginForm(forms.Form):
     username = forms.CharField(
-        label='نام کاربری',
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'نام کاربری'})
+        label='username',
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'username'})
     )
     password = forms.CharField(
-        label='رمز عبور',
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'رمز عبور'})
+        label='password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'password'})
     )        
 
 
@@ -81,10 +81,10 @@ class ProfileEditForm(forms.ModelForm):
         model = CustomUser
         fields = ['first_name', 'last_name', 'email', 'profile_image']   
         labels = {
-            'username': 'نام کاربری',
-            'first_name': 'نام',
-            'last_name': 'نام خانوادگی',
-            'profile_image': 'عکس پروفایل',
+            'username': 'username',
+            'first_name': 'first name',
+            'last_name': 'last name',
+            'profile_image': 'profile image',
         }
 
     def __init__(self, *args, **kwargs):
@@ -100,14 +100,14 @@ class ProfileEditForm(forms.ModelForm):
 
 class CustomPasswordChangeForm(PasswordChangeForm):
     old_password = forms.CharField(
-        label="رمز عبور فعلی",
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'رمز فعلی'}),
+        label="current password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'current password'}),
     )
     new_password1 = forms.CharField(
-        label="رمز عبور جدید",
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'رمز جدید'}),
+        label="new password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'new password'}),
     )
     new_password2 = forms.CharField(
-        label="تأیید رمز عبور جدید",
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'تکرار رمز جدید'}),
+        label="confirm new password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'confirm new password'}),
     ) 

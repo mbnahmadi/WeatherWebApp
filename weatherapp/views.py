@@ -23,7 +23,7 @@ def get_weather_latlon_view(request):
     if not lat or not lon:
         return JsonResponse({"error": "Missing latitude or longitude"}, status=400)
 
-    url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric&lang=fa"
+    url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
 
     response = requests.get(url)
     return JsonResponse(response.json())
@@ -34,13 +34,13 @@ def search_city_view(request):
     api_key = settings.OPENWEATHER_API_KEY
 
     if not city:
-        return JsonResponse({"error": "وارد کردن اسم شهر الزامی است!"}, status=400)
+        return JsonResponse({"error": "City name is required!"}, status=400)
 
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric&lang=fa"
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     response = requests.get(url)
 
     if response.status_code != 200:
-        return JsonResponse({"error": "شهر یافت نشد!"}, status=404)
+        return JsonResponse({"error": "City not found"}, status=404)
 
     return JsonResponse(response.json())
 
@@ -52,7 +52,7 @@ def get_forecast_view(request):
     api_key = settings.OPENWEATHER_API_KEY
 
     if not lat or not lon:
-        return JsonResponse({'error': 'مختصات نامعتبر است'}, status=400)
+        return JsonResponse({'error': 'Coordinates are invalid'}, status=400)
 
     try:
         url = "https://api.openweathermap.org/data/2.5/forecast"
@@ -61,20 +61,20 @@ def get_forecast_view(request):
             'lon': lon,
             'units': 'metric',
             'appid': api_key,
-            'lang': 'fa'
+            # 'lang': 'fa'
         }
 
         response = requests.get(url, params=params)
         if response.status_code != 200:
-            return JsonResponse({'error': f'خطای API: {response.json().get("message", "مشکل ناشناخته")}'}, status=response.status_code)
+            return JsonResponse({'error': f'API error: {response.json().get("message", 'unknown problem')}'}, status=response.status_code)
 
         data = response.json()
         forecast_list = data.get("list", [])
         if not forecast_list:
-            return JsonResponse({'error': 'داده‌ای برای پیش‌بینی یافت نشد'}, status=404)
+            return JsonResponse({'error': 'No data found for prediction'}, status=404)
 
         daily_data = [forecast_list[i] for i in range(0, len(forecast_list), 8)]
         return JsonResponse({'daily': daily_data})
 
     except Exception as e:
-        return JsonResponse({'error': f'خطا در پردازش درخواست: {str(e)}'}, status=500)
+        return JsonResponse({'error': f'Error processing request: {str(e)}'}, status=500)
