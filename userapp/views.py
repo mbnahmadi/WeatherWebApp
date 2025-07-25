@@ -14,7 +14,7 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)  #  این خط باعث لاگین خودکار می‌شه
-            messages.success(request, "ثبت‌نام با موفقیت انجام شد و وارد شدید.")
+            messages.success(request, "Registration was successful and you are logged in.")
             return redirect('home')
     else:
         form = CustomUserCreationForm()
@@ -34,14 +34,14 @@ def login_view(request):
                 login(request, user)
                 return redirect("home")  # یا هر صفحه‌ای که بعد لاگین می‌خوای بره
             else:
-                error = "نام کاربری یا رمز عبور نادرست است"
+                error = "The username or password is incorrect"
 
     return render(request, "accounts/login.html", {"form": form, "error": error})
 
 @login_required
 def logout_view(request):
     logout(request)
-    messages.success(request, "با موفقیت خارج شدید.")
+    messages.success(request, "You have successfully logged out.")
     return redirect('home')  # یا مسیر صفحه اصلی شما
 
 
@@ -57,7 +57,7 @@ def edit_profile_view(request):
         form = ProfileEditForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, "پروفایل با موفقیت به‌روزرسانی شد.")
+            messages.success(request, "Profile updated successfully.")
             return redirect('profile')
     else:
         form = ProfileEditForm(instance=request.user)
@@ -72,5 +72,5 @@ class CustomPasswordChangeView(PasswordChangeView):
     form_class = CustomPasswordChangeForm 
 
     def form_valid(self, form):
-        messages.success(self.request, "رمز عبور با موفقیت تغییر کرد.")
+        messages.success(self.request, "Password changed successfully.")
         return super().form_valid(form)
